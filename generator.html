@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>مولد البطاقات</title>
+  <style>
+    body { font-family: Tahoma, sans-serif; background: #f4f4f4; padding: 20px; }
+    label { display: block; margin: 10px 0 5px; }
+    input, button { padding: 8px; width: 100%; margin-bottom: 15px; }
+    textarea { width: 100%; height: 150px; }
+    #generator { display: none; } /* المولد مخفي بالبداية */
+  </style>
+</head>
+<body>
+
+‎  <!-- نافذة كلمة المرور -->
+  <div id="login">
+    <h2>🔒 أدخل كلمة المرور</h2>
+    <input type="password" id="passwordInput" placeholder="•••••">
+    <button onclick="checkPassword()">دخول</button>
+    <p id="error" style="color:red;display:none">❌ كلمة المرور غير صحيحة</p>
+  </div>
+
+‎  <!-- واجهة المولد (مخفية إلا بعد كلمة المرور) -->
+  <div id="generator">
+    <h2>🛠️ مولد بطاقة مباراة</h2>
+
+    <label>الفريق الأول</label>
+    <input type="text" id="team1" placeholder="برشلونة">
+
+    <label>الفريق الثاني</label>
+    <input type="text" id="team2" placeholder="ريال مدريد">
+
+    <label>التوقيت</label>
+    <input type="datetime-local" id="matchTime">
+
+    <label>رابط البث (iframe)</label>
+    <input type="text" id="streamUrl" placeholder="https://example.com/embed">
+
+    <button onclick="generateCard()">توليد البطاقة</button>
+
+    <h3>الكود الناتج:</h3>
+    <textarea id="result" readonly></textarea>
+  </div>
+
+  <script>
+‎    // كلمة المرور الصحيحة
+    const correctPassword = "1234"; 
+
+    function checkPassword() {
+      const input = document.getElementById("passwordInput").value;
+      if (input === correctPassword) {
+        document.getElementById("login").style.display = "none";
+        document.getElementById("generator").style.display = "block";
+      } else {
+        document.getElementById("error").style.display = "block";
+      }
+    }
+
+    function generateCard() {
+      const team1 = document.getElementById('team1').value.trim();
+      const team2 = document.getElementById('team2').value.trim();
+      const matchTime = new Date(document.getElementById('matchTime').value).getTime();
+      const streamUrl = document.getElementById('streamUrl').value.trim();
+
+      if (!team1 || !team2 || !matchTime || !streamUrl) {
+        alert("⚠️ يرجى تعبئة كل الحقول");
+        return;
+      }
+
+      const uniqueId = 'mc_' + Math.random().toString(36).substr(2, 9);
+
+      const code = `
+<div id="${uniqueId}" style="font-family:Tahoma;direction:rtl;max-width:420px;cursor:pointer;margin:auto">
+  <div style="display:flex;align-items:center;justify-content:space-between;background:#fff;padding:10px;border-radius:8px;margin:10px 0;box-shadow:0 0 5px rgba(0,0,0,0.08)">
+    <div style="text-align:center;color:#000;">
+      <span style="font-size:14px">${team1}</span>
+    </div>
+    <div style="text-align:center">
+      <div class="mc-status" style="padding:5px 10px;border-radius:5px;font-weight:700;display:inline-block"></div>
+      <div class="mc-time" style="font-size:12px;color:#666;margin-top:6px">${new Date(matchTime).toLocaleString('ar-EG')}</div>
+    </div>
+    <div style="text-align:center;color:#000;">
+      <span style="font-size:14px">${team2}</span>
+    </div>
+  </div>
+</div>`;
+      
+      document.getElementById('result').value = code.trim();
+
+      if (window.opener) {
+        const container = window.opener.document.getElementById('cardsContainer');
+        if (container) {
+          const tempDiv = document.createElement('div');
+          tempDiv.innerHTML = code;
+          container.appendChild(tempDiv);
+        }
+      }
+    }
+  </script>
+
+</body>
+</html>
